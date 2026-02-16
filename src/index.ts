@@ -118,10 +118,10 @@ export class MyMCP extends McpAgent {
 					case 535353535353:
 						result = cargo1;
 						break;
-					case 535353535353:
+					case 123123123123:
 						result = cargo2;
 						break;
-					case 535353535353:
+					case 120012001200:
 						result = cargo3;
 						break;
 					
