@@ -58,77 +58,39 @@ export class MyMCP extends McpAgent {
 		);
 
 		//Search Cargo Tool
-		interface Cargo {
-            id:number,
-            nameSurname : string,
-            phoneNumber : string,
-            trackingNumber : string,
-            branchName : string,
-            branchCity : string,
-            branchProvince : string,
-            branchPhone: string,
-            cargoStatus : string
-		};
-		
-		cargo1:Cargo ={
-			Id=1,
-            nameSurname = "Ebru Keleş Acır",
-            phoneNumber = "5327099653",
-            trackingNumber = "535353535353",
-            branchName = "Samandıra",
-            branchCity = "İstanbul",
-            branchProvince = "Sancaktepe",
-            branchPhone = "2160000000",
-            cargoStatus = "Kargonuz Teslim Alındı"
-		};
-		
-		cargo2:Cargo ={
-			Id=2,
-            nameSurname = "Ebru Keleş Acır",
-            phoneNumber = "5305554743",
-            trackingNumber = "123123123123",
-            branchName = "Uğur Mumcu",
-            branchCity = "İstanbul",
-            branchProvince = "Kartal",
-            branchPhone = "2160000001",
-            cargoStatus = "Transfer Merkezinde"
-		};
-		
-		cargo3:Cargo ={
-			Id=3,
-            nameSurname = "Ebru Keleş Acır",
-            phoneNumber = "5327099653",
-            trackingNumber = "120012001200",
-            branchName = "Sancaktepe",
-            branchCity = "İstanbul",
-            branchProvince = "Sancaktepe",
-            branchPhone = "2160000002",
-            cargoStatus = "Teslim Şubesinde"
-		};
-		
-		this.server.tool(
-			"search_cargo",
-			{
-				// operation: z.enum(["add", "subtract", "multiply", "divide"]),
-				cargo_number: z.number(),
-			},
-			async ({ cargo_number }) => {
-				let result: Cargo;
-				switch (cargo_number) {
-					case 535353535353:
-						result = cargo1;
-						break;
-					case 123123123123:
-						result = cargo2;
-						break;
-					case 120012001200:
-						result = cargo3;
-						break;
-					
-				}
-				return { content: [{ type: "json", json: result }] };
-			},
-		);
+
+    const { Cargo_Search_BASE_URL } = this.env;
+    this.server.tool(
+      "search_cargo",
+      "Search all cargos with API",
+      {CargoTrackingNumber:external_exports3.string()}, 
+      async (CargoTrackingNumber) => {
+        try {
+          const baseUrl = Cargo_Search_BASE_URL ? Cargo_Search_BASE_URL.replace(/\/$/, "") : "";
+          const response = await fetch(`${baseUrl}/CargoSearch/ArasKargoSearch`, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({"CargoTrackingNumber":CargoTrackingNumber})
+          });
+          if (!response.ok) {
+            return {
+              content: [{ type: "text", text: `API Error: ${response.status} - Check if API key is valid.` }]
+            };
+          }
+          const data = await response.json();
+          return {
+            content: [{ type: "text", text: JSON.stringify(data, null, 2) }]
+          };
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          return {
+            content: [{ type: "text", text: `Connection Failed: ${errorMessage}` }]
+          };
+        }
+      }
+    );
 	}
 }
 
